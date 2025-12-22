@@ -16,7 +16,24 @@
 
 ## 🎯 What is KORTEX?
 
-**KORTEX** is an AI-powered CLI tool that translates natural language into shell commands. Stop Googling syntax — just describe what you want.
+**KORTEX** is your AI-powered terminal assistant. It translates natural language questions into precise Linux shell commands using Google Gemini — so you can focus on *what* you want to do, not *how* to do it.
+
+---
+
+## 🤔 Why KORTEX?
+
+| Problem | KORTEX Solution |
+|---------|-----------------|
+| Forgot the `find` command syntax? | Just ask: `kx "find files larger than 100MB"` |
+| Don't know how to use `nmap`? | Just ask: `kx "scan this IP for open ports"` |
+| Tired of Googling basic commands? | Get instant answers in your terminal |
+| Learning Linux/Security? | See real commands for your questions |
+
+**KORTEX is for:**
+- 🐧 Linux beginners learning command-line
+- 🔐 Security professionals who need quick commands
+- 💻 Developers who work faster with AI assistance
+- 🎓 Students learning system administration
 
 ```bash
 $ kx "find all files larger than 100MB"
