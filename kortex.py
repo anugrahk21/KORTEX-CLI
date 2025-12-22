@@ -19,7 +19,7 @@ if SCRIPT_PATH.is_symlink():
     SCRIPT_PATH = Path(os.readlink(SCRIPT_PATH))
 SCRIPT_DIR = SCRIPT_PATH.parent
 ENV_FILE = SCRIPT_DIR / ".env"
-MODEL_NAME = "gemini-1.5-flash"
+MODEL_NAME = "gemini-2.0-flash-exp"
 
 # ANSI Colors
 C_RESET = "\033[0m"
@@ -101,6 +101,33 @@ def get_api_key():
 # ═══════════════════════════════════════════════════════════════════════════════
 # AI Generation
 # ═══════════════════════════════════════════════════════════════════════════════
+def list_models(api_key: str):
+    """List available Gemini models."""
+    try:
+        from google import genai
+        client = genai.Client(api_key=api_key)
+        print(f"\n{C_CYAN}Available Models:{C_RESET}")
+        print(f"{C_DIM}{'─' * 40}{C_RESET}")
+        
+        # Paginate through models
+        pager = client.models.list(config={"page_size": 100})
+        found = False
+        for model in pager:
+            name = model.name.replace("models/", "")
+            if "gemini" in name:
+                print(f"  • {name}")
+                found = True
+        
+        if not found:
+            print(f"  {C_YELLOW}No Gemini models found explicitly.{C_RESET}")
+            
+        print(f"\n{C_DIM}Current Config: {MODEL_NAME}{C_RESET}\n")
+        
+    except Exception as e:
+        error(f"Failed to list models: {e}")
+        sys.exit(1)
+
+
 def generate_command(query: str, api_key: str) -> str:
     """Generate shell command using Gemini AI (google-genai)."""
     try:
@@ -215,6 +242,12 @@ def main():
     
     if arg in ('--version', '-v', 'version'):
         show_version()
+        return
+    
+    # Get API key first for models check
+    if arg == '--models':
+        api_key = get_api_key()
+        list_models(api_key)
         return
     
     # Get query and API key
