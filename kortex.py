@@ -403,3 +403,7 @@ def main():
     query = " ".join(sys.argv[1:])
     api_key = get_api_key()
     one_shot_mode(query, api_key)
+
+
+if __name__ == "__main__":
+    main()
