@@ -60,7 +60,9 @@ chmod +x install.sh
 ### Step 3: Get API Key (Free)
 When prompted, get your key from: **https://makersuite.google.com/app/apikey**
 
-**Done!** Use `kx` from anywhere.
+**Done!** 
+
+> 💡 After installation, `kx` works **globally from anywhere** on your system — just like `ls` or `grep`. No need to be in the Kortex-CLI folder!
 
 ---
 
