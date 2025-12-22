@@ -13,7 +13,11 @@ from pathlib import Path
 # ═══════════════════════════════════════════════════════════════════════════════
 # Configuration
 # ═══════════════════════════════════════════════════════════════════════════════
-SCRIPT_DIR = Path(__file__).parent.resolve()
+# Resolve symlink to find the actual script directory (where .env lives)
+SCRIPT_PATH = Path(__file__).resolve()  # Resolves symlink to actual file
+if SCRIPT_PATH.is_symlink():
+    SCRIPT_PATH = Path(os.readlink(SCRIPT_PATH))
+SCRIPT_DIR = SCRIPT_PATH.parent
 ENV_FILE = SCRIPT_DIR / ".env"
 MODEL_NAME = "gemini-1.5-flash"
 
