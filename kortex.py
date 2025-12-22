@@ -19,7 +19,7 @@ if SCRIPT_PATH.is_symlink():
     SCRIPT_PATH = Path(os.readlink(SCRIPT_PATH))
 SCRIPT_DIR = SCRIPT_PATH.parent
 ENV_FILE = SCRIPT_DIR / ".env"
-MODEL_NAME = "gemini-2.0-flash-exp"
+MODEL_NAME = "gemini-2.0-flash"
 
 # ANSI Colors
 C_RESET = "\033[0m"
