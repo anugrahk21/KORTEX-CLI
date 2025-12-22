@@ -20,6 +20,7 @@ if SCRIPT_PATH.is_symlink():
 SCRIPT_DIR = SCRIPT_PATH.parent
 ENV_FILE = SCRIPT_DIR / ".env"
 MODEL_NAME = "gemini-2.5-flash"
+VERSION = "1.1.0"
 
 # ANSI Colors
 C_RESET = "\033[0m"
@@ -42,6 +43,8 @@ BANNER = f"""
 {C_RESET}{C_DIM}              The Neural Layer for your Linux Kernel
                           By Anugrah K{C_RESET}
 """
+
+BANNER_MINI = f"{C_CYAN}{C_BOLD}KORTEX-CLI{C_RESET} v{VERSION} | Type 'help' for commands, 'exit' to quit\n"
 
 SYSTEM_PROMPT = """You are KORTEX, an expert Linux/Unix system administrator and security professional.
 Your ONLY task is to translate user requests into precise, executable shell commands.
@@ -99,6 +102,33 @@ def get_api_key():
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
+# Update Feature
+# ═══════════════════════════════════════════════════════════════════════════════
+def update_kortex():
+    """Update KORTEX-CLI from GitHub."""
+    print(f"\n{C_CYAN}Updating KORTEX-CLI...{C_RESET}\n")
+    
+    os.chdir(SCRIPT_DIR)
+    
+    # Stash any local changes
+    subprocess.run(["git", "stash"], capture_output=True)
+    
+    # Pull latest
+    result = subprocess.run(["git", "pull"], capture_output=True, text=True)
+    
+    if result.returncode == 0:
+        success("Updated successfully!")
+        print(f"{C_DIM}{result.stdout}{C_RESET}")
+    else:
+        error("Update failed!")
+        print(f"{C_DIM}{result.stderr}{C_RESET}")
+    
+    # Make executable
+    os.chmod(SCRIPT_PATH, 0o755)
+    print()
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
 # AI Generation
 # ═══════════════════════════════════════════════════════════════════════════════
 def list_models(api_key: str):
@@ -138,7 +168,7 @@ def generate_command(query: str, api_key: str) -> str:
         print(f"  Run: {C_CYAN}pip install google-genai{C_RESET}")
         sys.exit(1)
     
-    print(f"\n{C_MAGENTA}🧠 KORTEX is analyzing...{C_RESET}\n")
+    print(f"\n{C_MAGENTA}🧠 Analyzing...{C_RESET}")
     
     try:
         client = genai.Client(api_key=api_key)
@@ -162,7 +192,7 @@ def generate_command(query: str, api_key: str) -> str:
         
     except Exception as e:
         error(f"AI generation failed: {e}")
-        sys.exit(1)
+        return None
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -171,19 +201,20 @@ def generate_command(query: str, api_key: str) -> str:
 def display_command(command: str):
     """Display the proposed command."""
     border = "═" * 60
-    print(f"{C_YELLOW}{border}{C_RESET}")
-    print(f"{C_GREEN}{C_BOLD}👉 Proposed Action:{C_RESET}")
+    print(f"\n{C_YELLOW}{border}{C_RESET}")
+    print(f"{C_GREEN}{C_BOLD}👉 Proposed Command:{C_RESET}")
     print(f"\n   {C_CYAN}{C_BOLD}{command}{C_RESET}\n")
-    print(f"{C_YELLOW}{border}{C_RESET}\n")
+    print(f"{C_YELLOW}{border}{C_RESET}")
 
 
-def confirm() -> bool:
-    """Get user confirmation."""
+def get_action() -> str:
+    """Get user action choice."""
     try:
-        choice = input(f"{C_BOLD}[E]xecute  [C]ancel : {C_RESET}").strip().lower()
-        return choice in ('e', 'y', 'yes', 'execute')
+        print(f"\n{C_BOLD}[E]{C_RESET}xecute  {C_BOLD}[R]{C_RESET}efine  {C_BOLD}[C]{C_RESET}ancel")
+        choice = input(f"{C_DIM}> {C_RESET}").strip().lower()
+        return choice
     except (KeyboardInterrupt, EOFError):
-        return False
+        return 'c'
 
 
 def execute(command: str):
@@ -205,38 +236,153 @@ def show_help():
     print(BANNER)
     print(f"""
 {C_BOLD}Usage:{C_RESET}
-  kx "<your request>"
+  kx                     Enter interactive mode (KORTEX> prompt)
+  kx "<your request>"    One-shot command translation
+  
+{C_BOLD}Commands:{C_RESET}
+  kx update              Update KORTEX-CLI from GitHub
+  kx --models            List available AI models
+  kx --help              Show this help
+  kx --version           Show version
 
-{C_BOLD}Examples:{C_RESET}
-  kx "find all python files"
-  kx "scan 192.168.1.1 for open ports"
-  kx "compress the logs folder"
-
-{C_BOLD}Options:{C_RESET}
-  --help, -h     Show this help
-  --version, -v  Show version
+{C_BOLD}Interactive Mode:{C_RESET}
+  Type your request, then:
+  [E] Execute the command
+  [R] Refine - ask again with different wording
+  [C] Cancel
 """)
 
 
 def show_version():
     """Display version."""
-    print(f"\n{C_CYAN}KORTEX-CLI{C_RESET} v1.0.0")
+    print(f"\n{C_CYAN}KORTEX-CLI{C_RESET} v{VERSION}")
     print(f"By Anugrah K")
+    print(f"Model: {MODEL_NAME}")
     print(f"https://github.com/anugrahk21/Kortex-CLI\n")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Interactive Mode
+# ═══════════════════════════════════════════════════════════════════════════════
+def interactive_mode(api_key: str):
+    """Run KORTEX in interactive REPL mode."""
+    print(BANNER)
+    print(BANNER_MINI)
+    
+    while True:
+        try:
+            # KORTEX> prompt
+            query = input(f"{C_CYAN}{C_BOLD}KORTEX>{C_RESET} ").strip()
+            
+            if not query:
+                continue
+            
+            # Handle special commands
+            if query.lower() in ('exit', 'quit', 'q'):
+                print(f"\n{C_DIM}Goodbye!{C_RESET}\n")
+                break
+            elif query.lower() in ('help', 'h', '?'):
+                show_help()
+                continue
+            elif query.lower() == 'update':
+                update_kortex()
+                continue
+            elif query.lower() == 'models':
+                list_models(api_key)
+                continue
+            elif query.lower() == 'clear':
+                os.system('clear' if os.name != 'nt' else 'cls')
+                print(BANNER_MINI)
+                continue
+            elif query.lower() == 'version':
+                show_version()
+                continue
+            
+            # Generate command
+            command = generate_command(query, api_key)
+            if not command:
+                continue
+            
+            display_command(command)
+            
+            # Action loop (allows refinement)
+            while True:
+                action = get_action()
+                
+                if action in ('e', 'y', 'yes', 'execute'):
+                    execute(command)
+                    break
+                elif action in ('r', 'refine', 'again'):
+                    print(f"\n{C_DIM}Describe what you want differently:{C_RESET}")
+                    new_query = input(f"{C_CYAN}{C_BOLD}KORTEX>{C_RESET} ").strip()
+                    if new_query:
+                        command = generate_command(new_query, api_key)
+                        if command:
+                            display_command(command)
+                        else:
+                            break
+                else:
+                    print(f"{C_DIM}  → Cancelled{C_RESET}")
+                    break
+            
+            print()  # Spacing
+            
+        except KeyboardInterrupt:
+            print(f"\n\n{C_DIM}Goodbye!{C_RESET}\n")
+            break
+        except EOFError:
+            break
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# One-Shot Mode
+# ═══════════════════════════════════════════════════════════════════════════════
+def one_shot_mode(query: str, api_key: str):
+    """Run a single query and exit."""
+    command = generate_command(query, api_key)
+    if not command:
+        return
+    
+    display_command(command)
+    
+    while True:
+        action = get_action()
+        
+        if action in ('e', 'y', 'yes', 'execute'):
+            execute(command)
+            break
+        elif action in ('r', 'refine', 'again'):
+            print(f"\n{C_DIM}Describe what you want differently:{C_RESET}")
+            try:
+                new_query = input(f"{C_CYAN}{C_BOLD}KORTEX>{C_RESET} ").strip()
+                if new_query:
+                    command = generate_command(new_query, api_key)
+                    if command:
+                        display_command(command)
+                    else:
+                        break
+            except (KeyboardInterrupt, EOFError):
+                break
+        else:
+            print(f"\n{C_DIM}  → Cancelled{C_RESET}\n")
+            break
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # Main
 # ═══════════════════════════════════════════════════════════════════════════════
 def main():
+    # No arguments -> Interactive mode
     if len(sys.argv) < 2:
-        print(BANNER)
-        show_help()
+        api_key = get_api_key()
+        interactive_mode(api_key)
         return
     
     arg = sys.argv[1].lower()
     
+    # Special commands
     if arg in ('--help', '-h', 'help'):
+        print(BANNER)
         show_help()
         return
     
@@ -244,26 +390,16 @@ def main():
         show_version()
         return
     
-    # Get API key first for models check
-    if arg == '--models':
+    if arg in ('--models', 'models'):
         api_key = get_api_key()
         list_models(api_key)
         return
+        
+    if arg in ('update', '--update'):
+        update_kortex()
+        return
     
-    # Get query and API key
+    # One-shot query mode
     query = " ".join(sys.argv[1:])
     api_key = get_api_key()
-    
-    # Generate and display command
-    command = generate_command(query, api_key)
-    display_command(command)
-    
-    # Execute if confirmed
-    if confirm():
-        execute(command)
-    else:
-        print(f"\n{C_DIM}  → Cancelled{C_RESET}\n")
-
-
-if __name__ == "__main__":
-    main()
+    one_shot_mode(query, api_key)
