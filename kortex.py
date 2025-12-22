@@ -102,20 +102,29 @@ def get_api_key():
 # AI Generation
 # ═══════════════════════════════════════════════════════════════════════════════
 def generate_command(query: str, api_key: str) -> str:
-    """Generate shell command using Gemini AI."""
+    """Generate shell command using Gemini AI (google-genai)."""
     try:
-        import google.generativeai as genai
+        from google import genai
+        from google.genai import types
     except ImportError:
-        error("google-generativeai not installed!")
-        print(f"  Run: {C_CYAN}pip install google-generativeai{C_RESET}")
+        error("google-genai not installed!")
+        print(f"  Run: {C_CYAN}pip install google-genai{C_RESET}")
         sys.exit(1)
     
     print(f"\n{C_MAGENTA}🧠 KORTEX is analyzing...{C_RESET}\n")
     
     try:
-        genai.configure(api_key=api_key)
-        model = genai.GenerativeModel(MODEL_NAME, system_instruction=SYSTEM_PROMPT)
-        response = model.generate_content(query, generation_config={"temperature": 0.1, "max_output_tokens": 256})
+        client = genai.Client(api_key=api_key)
+        
+        response = client.models.generate_content(
+            model=MODEL_NAME,
+            contents=query,
+            config=types.GenerateContentConfig(
+                system_instruction=SYSTEM_PROMPT,
+                temperature=0.1,
+                max_output_tokens=256
+            )
+        )
         
         command = response.text.strip()
         # Remove markdown formatting if present

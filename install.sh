@@ -35,31 +35,31 @@ else
     exit 1
 fi
 
-# Check google-generativeai
-if python3 -c "import google.generativeai" 2>/dev/null; then
-    echo -e "  ${GREEN}✓${RESET} google-generativeai: Installed"
+# Check google-genai
+if python3 -c "import google.genai" 2>/dev/null; then
+    echo -e "  ${GREEN}✓${RESET} google-genai: Installed"
 else
-    echo -e "  ${YELLOW}!${RESET} google-generativeai: Not installed"
+    echo -e "  ${YELLOW}!${RESET} google-genai: Not installed"
     echo ""
-    read -p "  Install google-generativeai? [Y/n]: " INSTALL_DEP
+    read -p "  Install google-genai? [Y/n]: " INSTALL_DEP
     if [[ ! "$INSTALL_DEP" =~ ^[Nn]$ ]]; then
         echo -e "  Installing..."
         
         # Try pipx first (recommended for Kali)
         if command -v pipx &>/dev/null; then
-            pipx install google-generativeai 2>/dev/null || pip3 install --user --break-system-packages google-generativeai
+            pipx install google-genai 2>/dev/null || pip3 install --user --break-system-packages google-genai
         else
             # Try --break-system-packages for modern Kali/Debian
-            pip3 install --user --break-system-packages google-generativeai 2>/dev/null || \
-            pip3 install --user google-generativeai 2>/dev/null || \
-            pip3 install google-generativeai
+            pip3 install --user --break-system-packages google-genai 2>/dev/null || \
+            pip3 install --user google-genai 2>/dev/null || \
+            pip3 install google-genai
         fi
         
         if [ $? -eq 0 ]; then
             echo -e "  ${GREEN}✓${RESET} Installed successfully"
         else
             echo -e "  ${RED}✗${RESET} Failed. Try manually:"
-            echo -e "     ${CYAN}pip3 install --break-system-packages google-generativeai${RESET}"
+            echo -e "     ${CYAN}pip3 install --break-system-packages google-genai${RESET}"
             exit 1
         fi
     else

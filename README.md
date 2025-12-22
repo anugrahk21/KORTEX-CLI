@@ -97,7 +97,7 @@ Kortex-CLI/
 ## 🛠️ Manual Setup
 
 ```bash
-pip install google-generativeai
+pip install google-genai
 echo "GEMINI_API_KEY=your_key_here" > .env
 chmod +x kortex.py
 sudo ln -s $(pwd)/kortex.py /usr/local/bin/kx
