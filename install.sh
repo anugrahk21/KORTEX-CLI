@@ -1,8 +1,6 @@
 #!/bin/bash
 # KORTEX-CLI Installer | By Anugrah K
 
-set -e
-
 # Colors
 RED='\033[91m'; GREEN='\033[92m'; YELLOW='\033[93m'; CYAN='\033[96m'
 BOLD='\033[1m'; DIM='\033[2m'; RESET='\033[0m'
@@ -19,8 +17,9 @@ echo " ╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═╝   ╚═�
 echo -e "${RESET}${DIM}                        Installer | By Anugrah K${RESET}"
 echo ""
 
-# Check Python
 echo -e "${BOLD}Checking requirements...${RESET}"
+
+# Check Python
 if command -v python3 &>/dev/null; then
     echo -e "  ${GREEN}✓${RESET} Python3: $(python3 --version 2>&1 | awk '{print $2}')"
 else
@@ -46,8 +45,15 @@ else
     echo ""
     read -p "  Install google-generativeai? [Y/n]: " INSTALL_DEP
     if [[ ! "$INSTALL_DEP" =~ ^[Nn]$ ]]; then
-        pip3 install -q google-generativeai
-        echo -e "  ${GREEN}✓${RESET} Installed successfully"
+        echo -e "  Installing..."
+        pip3 install --user google-generativeai
+        if [ $? -eq 0 ]; then
+            echo -e "  ${GREEN}✓${RESET} Installed successfully"
+        else
+            echo -e "  ${RED}✗${RESET} Installation failed. Try manually:"
+            echo -e "     ${CYAN}pip3 install --user google-generativeai${RESET}"
+            exit 1
+        fi
     else
         echo -e "  ${RED}✗${RESET} Skipped. Run manually: pip3 install google-generativeai"
         exit 1
@@ -58,15 +64,13 @@ echo ""
 
 # Setup .env file
 if [ -f "$SCRIPT_DIR/.env" ]; then
-    # Check if API key is configured (not placeholder)
     CURRENT_KEY=$(grep "GEMINI_API_KEY=" "$SCRIPT_DIR/.env" 2>/dev/null | cut -d'=' -f2)
     if [ -z "$CURRENT_KEY" ] || [ "$CURRENT_KEY" = "your_api_key_here" ]; then
         echo -e "${YELLOW}!${RESET} API key not configured"
         echo ""
         echo -e "  Get your key: ${CYAN}https://makersuite.google.com/app/apikey${RESET}"
         echo ""
-        read -sp "  Enter your Gemini API Key (hidden): " API_KEY
-        echo ""
+        read -p "  Enter your Gemini API Key: " API_KEY
         if [ -n "$API_KEY" ]; then
             echo "GEMINI_API_KEY=$API_KEY" > "$SCRIPT_DIR/.env"
             echo -e "  ${GREEN}✓${RESET} API key saved"
@@ -79,13 +83,12 @@ else
     echo ""
     echo -e "  Get your key: ${CYAN}https://makersuite.google.com/app/apikey${RESET}"
     echo ""
-    read -sp "  Enter your Gemini API Key (hidden): " API_KEY
-    echo ""
+    read -p "  Enter your Gemini API Key: " API_KEY
     if [ -n "$API_KEY" ]; then
         echo "GEMINI_API_KEY=$API_KEY" > "$SCRIPT_DIR/.env"
         echo -e "  ${GREEN}✓${RESET} .env created"
     else
-        echo -e "  ${RED}✗${RESET} No key entered. Add it later to .env file:"
+        echo -e "  ${RED}✗${RESET} No key entered. Add it later:"
         echo -e "     ${CYAN}echo 'GEMINI_API_KEY=your_key' > .env${RESET}"
     fi
 fi
