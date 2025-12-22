@@ -18,33 +18,17 @@
 
 **KORTEX** is an AI-powered CLI tool that translates natural language into precise shell commands. Stop Googling syntax — just describe what you want.
 
-```
-KORTEX> find all files larger than 100MB
-
-🧠 Analyzing...
-
-════════════════════════════════════════════════════════════
-👉 Proposed Command:
-
-   find . -type f -size +100M
-
-════════════════════════════════════════════════════════════
-
-[E]xecute  [R]efine  [C]ancel
-> 
-```
-
 ---
 
-## 🚀 Installation (3 Steps)
+## 🚀 Installation
 
-### Step 1: Clone
+### Step 1: Clone the Repository
 ```bash
 git clone https://github.com/anugrahk21/Kortex-CLI.git
 cd Kortex-CLI
 ```
 
-### Step 2: Run Installer
+### Step 2: Run the Installer
 ```bash
 chmod +x install.sh
 ./install.sh
@@ -52,132 +36,207 @@ chmod +x install.sh
 
 The installer will:
 - ✅ Check Python & pip
-- ✅ Install `google-genai` (prompts you first)
-- ✅ Ask for your API key
-- ✅ Create global `kx` command
+- ✅ Install `google-genai` dependency (prompts you first)
+- ✅ Ask for your Gemini API key
+- ✅ Create global `kx` command (works from anywhere)
 
-### Step 3: Get API Key (Free)
-When prompted, get your key from: **https://makersuite.google.com/app/apikey**
+### Step 3: Get Your API Key (Free)
+When prompted, get your free key from: **https://makersuite.google.com/app/apikey**
 
-**That's it!** Now use `kx` from anywhere on your system.
-
----
-
-## 💡 Usage
-
-KORTEX has **two modes**:
+**Done!** Now use `kx` from anywhere on your system.
 
 ---
 
-### Mode 1: Interactive Shell (`kx`)
+## 💡 Usage Modes
 
-Just type `kx` to enter the interactive `KORTEX>` prompt (like `msfconsole`):
+KORTEX has **two modes** of operation:
+
+### 1. Interactive Mode (`kx`)
+
+Enter the interactive `KORTEX>` shell (similar to `msfconsole`):
 
 ```bash
 kx
 ```
 
+**What you see:**
 ```
+ ██╗  ██╗ ██████╗ ██████╗ ████████╗███████╗██╗  ██╗       ██████╗██╗     ██╗
+ ...
 KORTEX-CLI v1.1.0 | Type 'help' for commands, 'exit' to quit
 
-KORTEX> find large files
+KORTEX> 
+```
+
+**How it works:**
+
+| Step | Action | Description |
+|------|--------|-------------|
+| 1 | Type your request | `KORTEX> find large files` |
+| 2 | Review the command | AI generates a shell command |
+| 3 | Choose action | `[E]xecute`, `[R]efine`, or `[C]ancel` |
+
+**Example Session:**
+```
+KORTEX> find all python files modified today
+
 🧠 Analyzing...
+
 ════════════════════════════════════════════════════════════
 👉 Proposed Command:
-   find . -type f -size +100M
+
+   find . -name "*.py" -mtime -1
+
 ════════════════════════════════════════════════════════════
+
+[E]xecute  [R]efine  [C]ancel
+> e
+
+▶ Executing...
+
+./scripts/backup.py
+./main.py
+
+✓ Done (exit code: 0)
+
+KORTEX> 
+```
+
+---
+
+### 2. One-Shot Mode (`kx "request"`)
+
+Run a single query directly from terminal without entering the shell:
+
+```bash
+kx "your request here"
+```
+
+**How it works:**
+
+| Step | Action | Description |
+|------|--------|-------------|
+| 1 | Run command with query | `kx "show disk usage"` |
+| 2 | Review the command | AI generates a shell command |
+| 3 | Choose action | `[E]xecute`, `[R]efine`, or `[C]ancel` |
+
+**Example:**
+```bash
+$ kx "compress the logs folder"
+
+🧠 Analyzing...
+
+════════════════════════════════════════════════════════════
+👉 Proposed Command:
+
+   tar -czvf logs.tar.gz logs/
+
+════════════════════════════════════════════════════════════
+
 [E]xecute  [R]efine  [C]ancel
 > 
 ```
 
-**Commands inside the shell:**
+---
+
+## 🛠️ Built-in Commands
+
+### Commands Inside Interactive Shell (`KORTEX>`)
 
 | Command | Description |
 |---------|-------------|
-| `<your request>` | Translate to shell command |
-| `help` | Show help |
-| `update` | Update KORTEX from GitHub |
+| `<your request>` | Translate natural language to shell command |
+| `help` | Show help menu |
+| `update` | Update KORTEX-CLI from GitHub |
 | `models` | List available AI models |
 | `version` | Show version info |
-| `clear` | Clear screen |
-| `exit` | Exit KORTEX |
+| `clear` | Clear the screen |
+| `exit` / `quit` / `q` | Exit KORTEX |
 
-**Action options after command is generated:**
-- `[E]` - Execute the command
-- `[R]` - Refine (ask differently)
-- `[C]` - Cancel
+### CLI Flags (Terminal Commands)
 
----
+| Command | Description |
+|---------|-------------|
+| `kx` | Enter interactive mode |
+| `kx "request"` | One-shot query |
+| `kx --help` or `kx -h` | Show help |
+| `kx --version` or `kx -v` | Show version |
+| `kx --models` | List available AI models |
+| `kx update` | Update KORTEX-CLI from GitHub |
 
-### Mode 2: One-Shot (`kx "request"`)
+### Action Options (After Command is Generated)
 
-Run a single query directly from terminal:
-
-```bash
-kx "show disk usage"
-```
-
-Quick and direct - perfect for scripts or fast lookups.
-
----
-
-### CLI Flags (work from anywhere)
-
-```bash
-kx --help       # Show help
-kx --version    # Show version  
-kx --models     # List AI models
-kx update       # Update KORTEX
-```
+| Key | Action | Description |
+|-----|--------|-------------|
+| `E` | Execute | Run the proposed command |
+| `R` | Refine | Ask again with different wording |
+| `C` | Cancel | Cancel and return to prompt |
 
 ---
 
 ## 📝 Examples
 
+### File Operations
 ```bash
-# File operations
-kx "find all python files modified today"
+kx "find all python files"
+kx "find files larger than 100MB"
 kx "compress this folder to zip"
 kx "delete files older than 30 days"
+kx "count lines of code in this project"
+```
 
-# Network/Security
+### Network & Security
+```bash
 kx "scan 192.168.1.1 for open ports"
 kx "show active network connections"
 kx "check if port 80 is open"
+kx "show my public IP"
+kx "list all listening ports"
+```
 
-# System
+### System Administration
+```bash
 kx "show disk usage sorted by size"
 kx "find processes using most CPU"
 kx "show memory usage"
+kx "list all running services"
+kx "check system uptime"
 ```
 
 ---
 
-## 🔄 Updating
+## 🔄 Updating KORTEX
 
-Inside KORTEX shell:
+### From Inside Interactive Shell:
 ```
 KORTEX> update
 ```
 
-Or from terminal:
+### From Terminal:
 ```bash
 kx update
 ```
 
-No need to manually `git pull` or fix permissions — the update command handles everything!
+The update command automatically:
+- ✅ Stashes local changes
+- ✅ Pulls latest from GitHub
+- ✅ Fixes file permissions
+
+No manual `git pull` or `chmod` needed!
 
 ---
 
 ## ⚙️ Configuration
 
-Your API key is stored in `.env` file (inside the Kortex-CLI folder):
+Your API key is stored in the `.env` file (inside the Kortex-CLI folder):
 
-```bash
-GEMINI_API_KEY=your_key_here
+```
+GEMINI_API_KEY=your_api_key_here
 ```
 
-To change it: Edit `.env` or delete it and run `./install.sh` again.
+**To change your API key:**
+1. Edit `.env` file directly, OR
+2. Delete `.env` and run `./install.sh` again
 
 ---
 
@@ -197,12 +256,19 @@ Kortex-CLI/
 
 ## 🛠️ Manual Installation
 
-If you prefer manual setup:
+If you prefer manual setup instead of using the installer:
 
 ```bash
+# Install dependency
 pip install google-genai
-echo "GEMINI_API_KEY=your_key" > .env
+
+# Create .env file with your API key
+echo "GEMINI_API_KEY=your_key_here" > .env
+
+# Make executable
 chmod +x kortex.py
+
+# Create global symlink
 sudo ln -s $(pwd)/kortex.py /usr/local/bin/kx
 ```
 
@@ -217,5 +283,5 @@ MIT License - See [LICENSE](LICENSE)
 <p align="center">
   <b>KORTEX-CLI</b> by <a href="https://github.com/anugrahk21">Anugrah K</a>
   <br><br>
-  ⭐ Star if useful!
+  ⭐ Star this repo if you find it useful!
 </p>
