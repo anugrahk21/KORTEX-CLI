@@ -24,7 +24,6 @@ if command -v python3 &>/dev/null; then
     echo -e "  ${GREEN}✓${RESET} Python3: $(python3 --version 2>&1 | awk '{print $2}')"
 else
     echo -e "  ${RED}✗${RESET} Python3: Not found"
-    echo -e "    Install: ${CYAN}sudo apt install python3 python3-pip${RESET}"
     exit 1
 fi
 
@@ -33,7 +32,6 @@ if command -v pip3 &>/dev/null; then
     echo -e "  ${GREEN}✓${RESET} pip3: Found"
 else
     echo -e "  ${RED}✗${RESET} pip3: Not found"
-    echo -e "    Install: ${CYAN}sudo apt install python3-pip${RESET}"
     exit 1
 fi
 
@@ -46,16 +44,25 @@ else
     read -p "  Install google-generativeai? [Y/n]: " INSTALL_DEP
     if [[ ! "$INSTALL_DEP" =~ ^[Nn]$ ]]; then
         echo -e "  Installing..."
-        pip3 install --user google-generativeai
+        
+        # Try pipx first (recommended for Kali)
+        if command -v pipx &>/dev/null; then
+            pipx install google-generativeai 2>/dev/null || pip3 install --user --break-system-packages google-generativeai
+        else
+            # Try --break-system-packages for modern Kali/Debian
+            pip3 install --user --break-system-packages google-generativeai 2>/dev/null || \
+            pip3 install --user google-generativeai 2>/dev/null || \
+            pip3 install google-generativeai
+        fi
+        
         if [ $? -eq 0 ]; then
             echo -e "  ${GREEN}✓${RESET} Installed successfully"
         else
-            echo -e "  ${RED}✗${RESET} Installation failed. Try manually:"
-            echo -e "     ${CYAN}pip3 install --user google-generativeai${RESET}"
+            echo -e "  ${RED}✗${RESET} Failed. Try manually:"
+            echo -e "     ${CYAN}pip3 install --break-system-packages google-generativeai${RESET}"
             exit 1
         fi
     else
-        echo -e "  ${RED}✗${RESET} Skipped. Run manually: pip3 install google-generativeai"
         exit 1
     fi
 fi
@@ -109,12 +116,11 @@ if [ -L "/usr/local/bin/kx" ] || [ -f "/usr/local/bin/kx" ]; then
 else
     echo -e "Creating global 'kx' command..."
     sudo ln -s "$SCRIPT_DIR/kortex.py" /usr/local/bin/kx
-    echo -e "  ${GREEN}✓${RESET} Symlink created: /usr/local/bin/kx"
+    echo -e "  ${GREEN}✓${RESET} Symlink created"
 fi
 
 echo ""
 echo -e "${GREEN}${BOLD}✓ KORTEX-CLI installed!${RESET}"
 echo ""
 echo -e "  Try: ${CYAN}kx \"list all files\"${RESET}"
-echo -e "  Help: ${CYAN}kx --help${RESET}"
 echo ""
